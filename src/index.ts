@@ -1,3 +1,5 @@
-import connectCoinbaseSocket from './socket';
+import dotenv from 'dotenv';
+import {connectCoinbase} from './socket';
+dotenv.config();
 
-connectCoinbaseSocket();
+connectCoinbase();
