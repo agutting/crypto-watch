@@ -1,15 +1,15 @@
 import { client as WebSocketClient } from 'websocket';
+import { insertTrade } from './data-storage';
+import { CreateTradeInput } from './types';
 
-export const connectCoinbase = () => {
+export const connectCoinbase = (productIds: string[], channels: string[]) => {
   const cbSocket = new WebSocketClient();
-  const subscribeMessage = JSON.stringify({
-    type: "subscribe",
-    channels: [
-      {
-        name: "ticker",
-        product_ids: ["ETH-USD"],
-      },
-    ],
+  const subscribeMessage = { type: "subscribe", channels: new Array() };
+  channels.forEach(c => {
+    subscribeMessage.channels.push({
+      name: c,
+      product_ids: productIds,
+    });
   });
 
   cbSocket.on('connect', connection => {
@@ -19,21 +19,17 @@ export const connectCoinbase = () => {
       console.error(`Error encountered: ${err}`);
     });
 
-    connection.sendUTF(subscribeMessage);
+    connection.sendUTF(JSON.stringify(subscribeMessage));
 
     connection.on('close', () => {
       console.log(`Connection to ${process.env.COINBASE_URL} closed`);
     });
 
-    connection.on('message', message => {
+    connection.on('message', async message => {
       if (message.type === 'utf8' && message.utf8Data) {
-        const ethMessage = JSON.parse(message.utf8Data)
-        // the `sequence` property, which uniquely identifies a websocket message, is not sequential
-        // trade_id is sequential and every trade is sent
-        if ((ethMessage.trade_id)) {
-          const date = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
-          console.log(`[${date}]:`);
-          console.table(JSON.parse(message.utf8Data));
+        const parsedMessage = JSON.parse(message.utf8Data) as CreateTradeInput;
+        if (parsedMessage.type === 'ticker') {
+          await insertTrade(parsedMessage);
         }
       }
     });
