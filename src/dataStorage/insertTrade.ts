@@ -1,16 +1,17 @@
-import { PrismaClient, Trade } from '@prisma/client';
+
 import { CreateTradeInput } from '../types';
+import { prisma } from './prismaInit';
 
 export const insertTrade = async (trade: CreateTradeInput) => {
-  const prisma = new PrismaClient();
   try {
+    const { trade_id, product_id } = trade;
     await prisma.trade.create({
       data: {
-        id: trade.trade_id,
+        id: trade_id,
         quantity: parseFloat(trade.last_size),
         time: new Date(trade.time),
         action: trade.side === 'buy' ? 'BUY' : 'SELL',
-        product_id: trade.product_id,
+        product_id,
         price: parseFloat(trade.price),
         open_24h: parseFloat(trade.open_24h),
         volume_24h: parseFloat(trade.volume_24h),
@@ -21,8 +22,7 @@ export const insertTrade = async (trade: CreateTradeInput) => {
         best_ask: parseFloat(trade.best_ask),
       }
     });
-    await prisma.$disconnect();
-    console.log(`Added ${trade.product_id} trade ${trade.trade_id} to database`);
+    console.log(`Added ${product_id} trade ${trade_id} to database`);
   } catch (err) {
     console.log(err);
   }

@@ -1,13 +1,13 @@
 import { client as WebSocketClient } from 'websocket';
-import { insertTrade } from './data-storage';
+import { insertTrade } from './dataStorage';
 import { CreateTradeInput } from './types';
 
 export const connectCoinbase = (productIds: string[], channels: string[]) => {
   const cbSocket = new WebSocketClient();
   const subscribeMessage = { type: "subscribe", channels: new Array() };
-  channels.forEach(c => {
+  channels.forEach(channel => {
     subscribeMessage.channels.push({
-      name: c,
+      name: channel,
       product_ids: productIds,
     });
   });
@@ -27,7 +27,7 @@ export const connectCoinbase = (productIds: string[], channels: string[]) => {
 
     connection.on('message', async message => {
       if (message.type === 'utf8' && message.utf8Data) {
-        const parsedMessage = JSON.parse(message.utf8Data) as CreateTradeInput;
+        const parsedMessage: CreateTradeInput = JSON.parse(message.utf8Data);
         if (parsedMessage.type === 'ticker') {
           await insertTrade(parsedMessage);
         }
