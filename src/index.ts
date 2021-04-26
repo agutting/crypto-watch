@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import {connectCoinbase} from './socket';
+import { connectCoinbase } from './socket';
 dotenv.config();
 
-connectCoinbase();
+connectCoinbase(['ETH-USD', 'BTC-USD'], ['ticker']);

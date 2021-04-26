@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_CONNECTION_STRING")
+}
+
+model Trade {
+  id          Int @id
+  quantity    Float
+  time        DateTime
+  action      TradeAction
+  product_id  String
+  price       Float
+  open_24h    Float
+  volume_24h  Float
+  low_24h     Float
+  high_24h    Float
+  volume_30d  Float
+  best_bid    Float
+  best_ask    Float
+}
+
+enum TradeAction {
+  BUY
+  SELL
+}
